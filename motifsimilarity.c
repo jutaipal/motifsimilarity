@@ -41,52 +41,7 @@ short int oriented_match_init (struct oriented_match *i)
     return(0);
 }
 
-/* COUNT PWM */
-struct count_pwm {char *name; short int width; long int max_counts; double **incidence;};
-
-short int count_pwm_clear (struct count_pwm *i, char *name, short int width, double initial_value)
-{
-short int maximum_width = max_width_of_pwm;
-short int counter;
-short int counter2;
-strcpy ((*i).name, name);
-(*i).width = width;
-(*i).max_counts = initial_value;
-for (counter = 0; counter < 5 + contacts * 12; counter++)
-{
-for (counter2 = 0; counter2 < maximum_width; counter2++) (*i).incidence[counter][counter2] = initial_value;
-}
-return(0);
-}
-
-short int count_pwm_init (struct count_pwm *i, char *name, short int width, double initial_value)
-{
-short int maximum_width = max_width_of_pwm;
-short int counter;
-short int counter2;
-(*i).name = malloc(1000);
-strcpy ((*i).name, name);
-(*i).width = width;
-(*i).max_counts = initial_value;
-(*i).incidence = malloc(sizeof(double *) * (5 + contacts * 12) + 5);
-for (counter = 0; counter < 5 + contacts * 12; counter++)
-{
-(*i).incidence[counter] = malloc(sizeof(double) * maximum_width + 5);
-for (counter2 = 0; counter2 < maximum_width; counter2++) (*i).incidence[counter][counter2] = initial_value;
-}
-return(0);
-}
-
-short int count_pwm_free (struct count_pwm *i)
-{
-    short int counter;
-    free((*i).name);
-    for (counter = 0; counter < 5; counter++) free((*i).incidence[counter]);
-    free((*i).incidence);
-    return(0);
-}
-
-
+/* PAIRWISE CORRELATION (single) */
 struct pairwise_correlation {short int first_base; short int second_base; double delta_ic; short int max_dinucleotide; short int min_dinucleotide; double min_fold_change; double max_fold_change;};
 
 /* NORMALIZED PWM */
@@ -229,7 +184,7 @@ for(line = 0; line <= 3; line++)
 (*p).fraction[line][pwm_position] = log10(((*p).fraction[line][pwm_position] + pseudocount) / (pseudocount + 1 - (*p).fraction[line][pwm_position]));
 }
 }
-for (line = 0; line < 4; line++) {printf("\n"); for (pwm_position = 0; pwm_position < (*p).width; pwm_position++) printf("\t%f", (*p).fraction[line][pwm_position]);}
+/* for (line = 0; line < 4; line++) {printf("\n"); for (pwm_position = 0; pwm_position < (*p).width; pwm_position++) printf("\t%f", (*p).fraction[line][pwm_position]);} */
 return(0);
 }
 
@@ -361,8 +316,6 @@ double fastgappedKmerscore (double **pwm, signed short int pwm_width, long long 
 /* MAIN PROGRAM */
 
 int main(int argc, const char * argv[]) {
-    // insert code here...
-    printf("Hello, World!\n");
     
     long double t0 = time((void *)0);
     long double t1;
@@ -410,19 +363,19 @@ int main(int argc, const char * argv[]) {
     
     
     strcpy(searchstring, argv[1 + firstnoncommandposition]);
-    printf("\n\nNORMALIZED MATRIX 1:\t%s", searchstring);
+    /* printf("\n\nNORMALIZED MATRIX 1:\t%s", searchstring); */
     Load_pwm (&qp, searchstring, 0);
     firstlength = qp.width;
     Normalize_pwm(&qp);
-    printf("\n\nLOG MATRIX 1:\t%s", searchstring);
+    /* printf("\n\nLOG MATRIX 1:\t%s", searchstring); */
     Log_ratio_pwm(&qp);
     
     strcpy(tempstring, argv[2 + firstnoncommandposition]);
-    printf("\n\nNORMALIZED MATRIX 2:\t%s", tempstring);
+    /* printf("\n\nNORMALIZED MATRIX 2:\t%s", tempstring); */
     Load_pwm (&mfp, tempstring, 0);
     secondlength = mfp.width;
     Normalize_pwm(&mfp);
-    printf("\n\nLOG MATRIX 2:\t%s", tempstring);
+    /* printf("\n\nLOG MATRIX 2:\t%s", tempstring); */
     Log_ratio_pwm(&mfp);
 
     if(firstlength > secondlength) too_long_kmer = firstlength;
